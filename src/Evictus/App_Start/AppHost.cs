@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Web;
+using NLog;
 using ServiceStack;
 using ServiceStack.Logging.NLogger;
 using ServiceStack.Razor;
@@ -13,6 +14,8 @@ namespace DrunkenWookie.Evictus
 {
     public class AppHost : AppHostBase
     {
+        private static readonly Logger Log = NLog.LogManager.GetCurrentClassLogger();
+
         public AppHost()
             : base("Evictus - Drunken Wookie", typeof(AppHost).Assembly)
         {
@@ -35,6 +38,9 @@ namespace DrunkenWookie.Evictus
             Plugins.Add(new ValidationFeature());
 
             container.RegisterValidators(typeof(AppHost).Assembly);
+
+            this.PreRequestFilters.Add((request, response) => Log.Info(request.AbsoluteUri));
+            this.GlobalRequestFilters.Add((request, response, dto) => Log.Info(request));
 
             RewriteReturnVoidToNoContent();
         }
